@@ -5,7 +5,7 @@
 #define BUTTON2 BIT7 //stop || led unit change
 #define FREQ 4096
 
-long count, time, timerCount;
+long count, time, timer_count;
 
 void finalResult();
 void initTimerA();
@@ -18,7 +18,7 @@ void initTimerA();
  * LED's
  */
 
-//time = count/freq
+//time = timer_count/freq
 
 //final = count/time
 

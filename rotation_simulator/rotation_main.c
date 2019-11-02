@@ -1,9 +1,5 @@
 #include <msp430.h> 
-
-#define LED BIT0
-#define BUTTON BIT3
-#define MAX_COUNT 4096
-#define SHIFTS 3
+#include "macros.h"
 
 /**
  * main.c
@@ -39,26 +35,4 @@ int main(void)
 
 	while(1) {}
 
-}
-
-#pragma vector=TIMER0_A0_VECTOR
-__interrupt void Timer_A(void) {
-    P1OUT ^= LED;
-    TA0CCR0 = count;
-}
-
-#pragma vector=PORT2_VECTOR
-__interrupt void PORT_2(void) {
-    if(shifts == 0) {
-        shifts = SHIFTS;
-        count = MAX_COUNT;
-    }
-
-    else {
-        count--;
-        count >>= 1;
-    }
-
-    shifts--;
-    P2IFG &= ~BUTTON;
 }
