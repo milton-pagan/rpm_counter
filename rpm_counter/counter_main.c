@@ -45,7 +45,7 @@ int main(void)
     P2IES |= BUTTON1 | BUTTON2;
     P2IE  |= BUTTON1 | BUTTON2;
 
-    initTimerA();
+    initTimer0A();
     TA0CCR0 = 1;
 //    if(BUTTON2.isPressed()){
 //        TA0CCR0 = 0;
@@ -56,18 +56,30 @@ int main(void)
     return 0;
 }
 
-void initTimerA(){
+void initTimer0A(){
     TA0CCR0 = 0; //Initially, Stop the Timer
     TA0CCTL0 |= CCIE; //Enable interrupt for CCR0.
-    TA0CTL |= TASSEL_0 + ID_3 + MC__CONTINUOUS; //Select TACLK, TACLK/1, Continuous Mode
+    TA0CTL |= TASSEL__ACLK + ID_3 + MC__CONTINUOUS; //Select TACLK, TACLK/1, Continuous Mode
 }
+
+void initTimer1A(){
+    TA1CCR0 = 0; //Initially, Stop the Timer
+    TA1CCTL0 |= CCIE; //Enable interrupt for CCR0.
+    TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP; //Select TACLK, TACLK/1, Continuous Mode
+}
+
 
 void finalResult(){
 
 }
 
 #pragma vector = TIMER0_A0_VECTOR
-__interrupt void Timer_A_CC0_ISR(){
+__interrupt void Timer0_A_CC0_ISR(){
     timerCount += 0xFFFF;
+}
+
+#pragma vector=TIMER1_A0_VECTOR
+__interrupt void Timer1_A_CC0_ISR() {
+
 }
 
