@@ -80,16 +80,16 @@ __interrupt void Timer1_A_CC0_ISR() {
         P1OUT ^= LED;
 
         if(timer_digit - 1 == 0) delay_on = 1;
-        TA1CCR0 = TA1CMP;
         timer_digit--;
     }
 
     if(delay_on && timer_delay != 0) {
-        TA1CCR0 = TA1CMP;
 
         if(timer_delay - 1 == 0) delay_on = 0;
         timer_delay--;
     }
+
+    TA1CCR0 = TA1CMP;
 }
 
 //Input ISR
