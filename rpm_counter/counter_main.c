@@ -7,8 +7,8 @@
 
 long signal_count, time, timer_count;
 
-int measuring,
-
+int measuring = 0;
+int lastDigit = 0;
 
 int main(void)
 {
@@ -72,13 +72,26 @@ __interrupt void Buttons_ISR() {
         P2IFG &= 0;
         return;
     }
-
+    // BUTTON1 pressed
     if(P2IFG == BUTTON1) {
+        P2IFG &= ~BUTTON1;
+        if(measuring == 1){
+            return;
+        }
+        measuring = 1;
+        P1IE |= BIT0;
+        signal_count = 0;
 
+        return;
     }
-
+    // BUTTON2 pressed
     else {
+        P2IFG &= ~BUTTON2;
 
+        if(measuring == 1){
+            measuring = 0;
+            return;
+        }
 
 
     }
