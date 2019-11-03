@@ -17,11 +17,13 @@ int result_digits[3];
 unsigned int index, current_digit;
 
 // Functions
-int main(void)
+void main()
 {
     WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 
     PM5CTL0 &= ~LOCKLPM5;
+
+    clear_global_variables();
 
     // Initialize 1.0 as input
     P1DIR &=  ~BIT0;
@@ -40,19 +42,19 @@ int main(void)
     P2IES |= BUTTON1 | BUTTON2;
     P2IE  |= BUTTON1 | BUTTON2;
 
-    // Initialize timer 0A
+    // Initialize timer A0
     TA0CCR0 = 0;
     TA0CCTL0 |= CCIE;
     TA0CTL |= TASSEL__ACLK + ID_3 + MC__CONTINUOUS;
 
-    // Initialize timer 1A
+    // Initialize timer A1
     TA1CCR0 = 0;
     TA1CCTL0 |= CCIE;
     TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
 
     _BIS_SR(CPUOFF + GIE);
 
-    return 0;
+    while(1);
 }
 
 // Timer A0 ISR
@@ -76,6 +78,9 @@ __interrupt void input_ISR() {
 // Buttons ISR
 #pragma vector=PORT2_VECTOR
 __interrupt void Buttons_ISR() {
+
+    long temp = TA0R;
+
     if(P2IFG == (BUTTON1 | BUTTON2)) {
         P2IFG &= 0;
         return;
@@ -104,7 +109,7 @@ __interrupt void Buttons_ISR() {
             P1IE &= ~BIT0;
 
             // Calculations
-            timer_count += TA0R;
+            timer_count += temp;
             time = timer_count/FREQ;
             // time to minutes
             time /= 60;
@@ -115,6 +120,7 @@ __interrupt void Buttons_ISR() {
             result_digits[1] = (result / 10) % 10;
             result_digits[0] = (result / 100) % 10;
             current_digit = result_digits[index++];
+
 
             TA1CCR0 = TA1CMP;
 
