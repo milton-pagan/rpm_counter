@@ -34,5 +34,4 @@ int main(void)
 	_BIS_SR(CPUOFF + GIE);
 
 	while(1) {}
-
 }

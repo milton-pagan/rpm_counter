@@ -6,9 +6,6 @@
 #define FREQ 4096
 
 long count, time, timer_count;
-
-void finalResult();
-void initTimerA();
 /**
  *
  * Dionel
@@ -22,10 +19,6 @@ void initTimerA();
 
 //final = count/time
 
-
-/**
- * main.c
- */
 int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
@@ -45,8 +38,17 @@ int main(void)
     P2IES |= BUTTON1 | BUTTON2;
     P2IE  |= BUTTON1 | BUTTON2;
 
-    initTimer0A();
+    // Initialize timer 0A
+    TA0CCR0 = 0;
+    TA0CCTL0 |= CCIE;
+    TA0CTL |= TASSEL__ACLK + ID_3 + MC__CONTINUOUS;
     TA0CCR0 = 1;
+
+    // Initialize timer 1A
+    TA1CCR0 = 0;
+    TA1CCTL0 |= CCIE;
+    TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
+
 //    if(BUTTON2.isPressed()){
 //        TA0CCR0 = 0;
 //        timeCount += TA0R;
@@ -56,30 +58,31 @@ int main(void)
     return 0;
 }
 
-void initTimer0A(){
-    TA0CCR0 = 0; //Initially, Stop the Timer
-    TA0CCTL0 |= CCIE; //Enable interrupt for CCR0.
-    TA0CTL |= TASSEL__ACLK + ID_3 + MC__CONTINUOUS; //Select TACLK, TACLK/1, Continuous Mode
-}
-
-void initTimer1A(){
-    TA1CCR0 = 0; //Initially, Stop the Timer
-    TA1CCTL0 |= CCIE; //Enable interrupt for CCR0.
-    TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP; //Select TACLK, TACLK/1, Continuous Mode
-}
-
-
-void finalResult(){
-
-}
-
-#pragma vector = TIMER0_A0_VECTOR
+// Timer A0 ISR
+#pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer0_A_CC0_ISR(){
     timerCount += 0xFFFF;
 }
 
+// Timer A1 ISR
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void Timer1_A_CC0_ISR() {
 
 }
 
+// Buttons ISR
+#pragma vector=PORT1_VECTOR
+__interrupt void Buttons_ISR() {
+    if(P2IFG == (BUTTON1 | BUTTON2)) {
+        P2IFG &= 0;
+        return;
+    }
+
+    if(P2IFG == BUTTON1) {
+
+    }
+
+    else {
+
+    }
+}
