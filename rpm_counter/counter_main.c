@@ -43,6 +43,7 @@ int main(void)
     TA1CCTL0 |= CCIE;
     TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
 
+    _BIS_SR(CPUOFF + GIE);
 
     return 0;
 }
@@ -62,7 +63,7 @@ __interrupt void Timer1_A_CC0_ISR() {
 //Input ISR
 #pragma vector=PORT1_VECTOR
 __interrupt void input_ISR() {
-
+    signal_count++;
 }
 
 // Buttons ISR
