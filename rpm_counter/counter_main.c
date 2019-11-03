@@ -70,6 +70,12 @@ __interrupt void Timer1_A_CC0_ISR() {
 
 }
 
+//Input ISR
+#pragma vector=PORT1_VECTOR
+__interrupt void input_ISR() {
+
+}
+
 // Buttons ISR
 #pragma vector=PORT1_VECTOR
 __interrupt void Buttons_ISR() {
