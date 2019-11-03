@@ -5,21 +5,10 @@
 #define BUTTON2 BIT7 //stop || led unit change
 #define FREQ 4096
 
-long count, time, timer_count;
+long signal_count, time, timer_count;
 
-int measuring,
-/**
- *
- * Dionel
- * Cuenta
- *
- * Milton
- * LED's
- */
-
-//time = timer_count/freq
-
-//final = count/time
+int measuring = 0;
+int lastDigit = 0;
 
 int main(void)
 {
@@ -51,10 +40,10 @@ int main(void)
     TA1CCTL0 |= CCIE;
     TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
 
-//    if(BUTTON2.isPressed()){
-//        TA0CCR0 = 0;
-//        timeCount += TA0R;
-//    }
+    //    if(BUTTON2.isPressed()){
+    //        TA0CCR0 = 0;
+    //        timeCount += TA0R;
+    //    }
 
 
     return 0;
@@ -85,13 +74,26 @@ __interrupt void Buttons_ISR() {
         P2IFG &= 0;
         return;
     }
-
+    // BUTTON1 pressed
     if(P2IFG == BUTTON1) {
+        P2IFG &= ~BUTTON1;
+        if(measuring == 1){
+            return;
+        }
+        measuring = 1;
+        P1IE |= BIT0;
+        signal_count = 0;
 
+        return;
     }
-
+    // BUTTON2 pressed
     else {
+        P2IFG &= ~BUTTON2;
 
+        if(measuring == 1){
+            measuring = 0;
+            return;
+        }
 
 
     }
