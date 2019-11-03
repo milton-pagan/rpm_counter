@@ -6,6 +6,8 @@
 #define FREQ 4096
 
 long count, time, timer_count;
+
+int measuring,
 /**
  *
  * Dionel
@@ -71,7 +73,7 @@ __interrupt void Timer1_A_CC0_ISR() {
 }
 
 // Buttons ISR
-#pragma vector=PORT1_VECTOR
+#pragma vector=PORT2_VECTOR
 __interrupt void Buttons_ISR() {
     if(P2IFG == (BUTTON1 | BUTTON2)) {
         P2IFG &= 0;
@@ -83,6 +85,8 @@ __interrupt void Buttons_ISR() {
     }
 
     else {
+
+
 
     }
 }
