@@ -4,7 +4,7 @@
 #define BUTTON1 BIT3 //start
 #define BUTTON2 BIT7 //stop || LED unit change
 #define FREQ 4096
-#define TA1CMP 1024 // Control LED flash velocity
+#define TA1CMP 2048 // Control LED flash velocity
 
 // Prototypes
 void clear_global_variables();
@@ -14,7 +14,7 @@ static long signal_count, time, timer_count, result;
 int measuring = 0;
 
 int result_digits[3];
-unsigned int index, current_digit;
+unsigned int index, current_digit, timer_digit, timer_delay, delay_on;
 
 // Functions
 int main(void)
@@ -64,7 +64,30 @@ __interrupt void Timer0_A_CC0_ISR(){
 // Timer A1 ISR
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void Timer1_A_CC0_ISR() {
+    if(!delay_on && timer_digit == 0) {
+        timer_digit = 2 * current_digit;
+        P1OUT &= ~LED;
+    }
 
+    if(delay_on && timer_delay == 0) {
+        P1OUT |= LED;
+        timer_delay = 20;
+    }
+
+    if(timer_delay == 0) {
+        P1OUT ^= LED;
+
+        if(timer_digit - 1 == 0) delay_on = 1;
+        TA1CCR0 = TA1CMP;
+        timer_digit--;
+    }
+
+    if(delay_on && timer_delay != 0) {
+        TA1CCR0 = TA1CMP;
+
+        if(timer_delay - 1 == 0) delay_on = 0;
+        timer_delay--;
+    }
 }
 
 //Input ISR
@@ -138,5 +161,7 @@ void clear_global_variables(){
     result = 0;
     index = 0;
     current_digit = 0;
+    timer_digit = 0;
+    delay_on = 0;
 
 }
