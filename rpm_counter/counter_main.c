@@ -5,21 +5,10 @@
 #define BUTTON2 BIT7 //stop || led unit change
 #define FREQ 4096
 
-long count, time, timer_count;
+long signal_count, time, timer_count;
 
 int measuring,
-/**
- *
- * Dionel
- * Cuenta
- *
- * Milton
- * LED's
- */
 
-//time = timer_count/freq
-
-//final = count/time
 
 int main(void)
 {
@@ -27,13 +16,17 @@ int main(void)
 
     PM5CTL0 &= ~LOCKLPM5;
 
+    // Initialize 1.0 as input
     P1DIR &=  ~BIT0;
     P1IN &= ~BIT0;
-
-    P1DIR |= LED;
-    P1OUT &= ~LED;
+    P1IE &= ~BIT0;
     P1IES |= BIT0;
 
+    // Initialize 1.7 as output
+    P1DIR |= LED;
+    P1OUT &= ~LED;
+
+    // Initialize 2.3 and 2.7 as pull-up inputs
     P2DIR &= ~BUTTON1 & ~BUTTON2;
     P2REN |= BUTTON1 | BUTTON2;
     P2OUT |= BUTTON1 | BUTTON2;
@@ -44,17 +37,11 @@ int main(void)
     TA0CCR0 = 0;
     TA0CCTL0 |= CCIE;
     TA0CTL |= TASSEL__ACLK + ID_3 + MC__CONTINUOUS;
-    TA0CCR0 = 1;
 
     // Initialize timer 1A
     TA1CCR0 = 0;
     TA1CCTL0 |= CCIE;
     TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
-
-//    if(BUTTON2.isPressed()){
-//        TA0CCR0 = 0;
-//        timeCount += TA0R;
-//    }
 
 
     return 0;
