@@ -15,34 +15,10 @@ TIMER0_A0_ISR
 
 	reti
 
-;---------------------------------------------------------
-;	BUTTON ISR
-;---------------------------------------------------------
-BUTTON_ISR
-
-	cmp #0, shifts
-	jne DECREASE
-
-	mov #SHIFTS, shifts
-	mov #MAX_COUNT, count
-
-	jmp END_ISR
-
-DECREASE:
-	rra count
-
-END_ISR:
-	dec shifts
-	bic.b #BUTTON,&P2IFG
-
-	reti
-
 ;------------------------------------------------------------------------------
 ;           Interrupt Vectors
 ;------------------------------------------------------------------------------
 	.sect   TIMER0_A0_VECTOR		; Timer A0 ISR
 	.short  TIMER0_A0_ISR
-	.sect 	PORT2_VECTOR			; Button 2.3 ISR
-	.short 	BUTTON_ISR
 
 	.end

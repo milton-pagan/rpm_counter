@@ -5,14 +5,13 @@
  * main.c
  */
 
-int shifts;
 int count;
+double temp;
+int rpm = 120;
+
 
 int main(void)
 {
-    shifts = SHIFTS;
-    count = MAX_COUNT;
-
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 	
 	PM5CTL0 &= ~LOCKLPM5;
@@ -20,14 +19,12 @@ int main(void)
 	P1DIR |= LED;
 	P1OUT &= ~LED;
 
-	P2DIR &= ~BUTTON;
-	P2REN |= BUTTON;
-	P2OUT |= BUTTON;
-	P2IES |= BUTTON;
-	P2IE  |= BUTTON;
-
 	TA0CTL |= TASSEL__ACLK | ID__8 | MC__UP;
 	TA0CCTL0 |= CCIE;
+
+	temp = rpm / 60;
+	temp = 1 / temp;
+	count  = (int) (temp * (FREQ / 2));
 
 	TA0CCR0 = count;
 

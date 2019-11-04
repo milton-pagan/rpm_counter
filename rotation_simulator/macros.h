@@ -7,9 +7,8 @@
 
 #pragma once
 #define LED BIT0
-#define BUTTON BIT3
-#define MAX_COUNT 4096
-#define SHIFTS 3
+#define FREQ 4096
+#define DEFAULT_RPM 60
 
 
 
