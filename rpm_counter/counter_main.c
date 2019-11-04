@@ -10,11 +10,11 @@
 void clear_global_variables();
 
 // Global Variables
-static long signal_count, time, timer_count, result;
+static long signal_count, time, timer_count;
 int measuring = 0;
 
 int result_digits[3];
-unsigned int index, current_digit, timer_digit, timer_delay, delay_on;
+unsigned int index, current_digit, timer_digit, timer_delay, delay_on, result;
 
 // Functions
 void main()
@@ -73,7 +73,7 @@ __interrupt void Timer1_A_CC0_ISR() {
 
     if(delay_on && timer_delay == 0) {
         P1OUT |= LED;
-        timer_delay = 20;
+        timer_delay = 6; // Changed from 20 -Dionel
     }
 
     if(timer_delay == 0) {
@@ -96,6 +96,7 @@ __interrupt void Timer1_A_CC0_ISR() {
 #pragma vector=PORT1_VECTOR
 __interrupt void input_ISR() {
     signal_count++;
+    P1IFG &= ~BIT0;
 }
 
 // Buttons ISR
@@ -104,6 +105,7 @@ __interrupt void Buttons_ISR() {
 
     long temp = TA0R;
 
+    // Both buttons pressed
     if(P2IFG == (BUTTON1 | BUTTON2)) {
         P2IFG &= 0;
         return;
@@ -112,38 +114,39 @@ __interrupt void Buttons_ISR() {
     if(P2IFG == BUTTON1) {
         P2IFG &= ~BUTTON1;
 
-        if(measuring == 1){
+        if(measuring){
             return;
         }
         TA1CCR0 = 0;
         P1OUT &= ~LED;
         measuring = 1;
-        P1IE |= BIT0;
         clear_global_variables();
+        P1IE |= BIT0;
         TA0CCR0 = 1;
         return;
     }
     // BUTTON2 pressed
     else {
         P2IFG &= ~BUTTON2;
-        if(measuring == 1){
+        if(measuring){
+            P1IE &= ~BIT0;
             TA0CCR0 = 0;
             measuring = 0;
-            P1IE &= ~BIT0;
 
             // Calculations
             timer_count += temp;
             time = timer_count/FREQ;
-            // time to minutes
-            time /= 60;
+            double aux = signal_count / time;
+            aux *= 60;
 
-            result = signal_count / time;
+            result = (int) aux;
+            //            result = 123;
 
             result_digits[2] = result % 10;
             result_digits[1] = (result / 10) % 10;
             result_digits[0] = (result / 100) % 10;
-            current_digit = result_digits[index++];
 
+            current_digit = result_digits[0];
 
             TA1CCR0 = TA1CMP;
 
@@ -154,7 +157,6 @@ __interrupt void Buttons_ISR() {
         else{
             if(index == 3) index = 0;
             current_digit = result_digits[index++];
-
         }
 
     }
