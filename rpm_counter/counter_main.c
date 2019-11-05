@@ -29,7 +29,8 @@ void main()
     P1DIR &=  ~BIT0;
     P1IN &= ~BIT0;
     P1IE &= ~BIT0;
-    P1IES &= ~BIT0;
+    P1REN |= BIT0;
+    P1IES |= BIT0;
 
     // Initialize 1.7 as output
     P1DIR |= LED;
@@ -57,6 +58,13 @@ void main()
     while(1);
 }
 
+//Input ISR
+#pragma vector=PORT1_VECTOR
+__interrupt void input_ISR() {
+    signal_count++;
+    P1IFG &= ~BIT0;
+}
+
 // Timer A0 ISR
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer0_A_CC0_ISR(){
@@ -82,13 +90,6 @@ __interrupt void Timer1_A_CC0_ISR() {
         P1OUT |= LED;
         TA1CCR0 = 10 * ONE_SEC;
     }
-}
-
-//Input ISR
-#pragma vector=PORT1_VECTOR
-__interrupt void input_ISR() {
-    signal_count++;
-    P1IFG &= ~BIT0;
 }
 
 // Buttons ISR
