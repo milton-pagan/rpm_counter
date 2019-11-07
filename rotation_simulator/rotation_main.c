@@ -1,21 +1,15 @@
 #include <msp430.h> 
 #include "macros.h"
 
-/**
- * main.c
- */
-
 int timer_count;
 int rpm_arr[5] = {60, 120, 180, 240, 300};
 int arr_size = 5;
-
 int* arr_pntr;
 int index = 0;
 int aux;
 
-int main(void)
-{
-	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+int main(void){
+	WDTCTL = WDTPW | WDTHOLD;	                        // stop watchdog timer
 	
 	PM5CTL0 &= ~LOCKLPM5;
 
@@ -36,8 +30,7 @@ int main(void)
 
 	// Initialize rpm values
 	arr_pntr = &rpm_arr[0];
-
-	aux = 2 * arr_size;         // Auxiliary variable to compare index
+	aux = 2 * arr_size;                                    // Auxiliary variable to compare index
 
 	int i;
 	for(i = 0; i < arr_size; i++) {
@@ -45,10 +38,8 @@ int main(void)
 	}
 
 	timer_count = rpm_arr[index];
-
 	TA0CCR0 = timer_count;
-
 	_BIS_SR(CPUOFF + GIE);
 
-	while(1) {}
+	while(1);
 }

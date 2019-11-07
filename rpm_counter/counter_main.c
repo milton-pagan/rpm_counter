@@ -1,26 +1,20 @@
 #include <msp430.h> 
 
 #define LED BIT7
-#define BUTTON1 BIT3 //start button
-#define BUTTON2 BIT7 //stop and LED unit change button
-#define FREQ 4096   // Clock frequency after dividers
-#define LED_PERIOD 2048 // LED flash period in terms of timer count
+#define BUTTON1 BIT3                    // start button
+#define BUTTON2 BIT7                    // stop and LED unit change button
+#define FREQ 4096                       // Clock frequency after dividers
+#define LED_PERIOD 2048                 // LED flash period in terms of timer count
 
-// Headers
 void clear_global_variables();
 
-// Global Variables
 static long signal_count, timer_digit;
 int measuring = 0;
-
 int result_digits[3];
 unsigned int index, current_digit, result;
 
-// Functions
-void main()
-{
-    WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-
+void main() {
+    WDTCTL = WDTPW | WDTHOLD;	           // stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;
 
     clear_global_variables();
@@ -54,7 +48,6 @@ void main()
     TA1CTL |= TASSEL__ACLK + ID_3 + MC__UP;
 
     _BIS_SR(CPUOFF + GIE);
-
     while(1);
 }
 
@@ -67,7 +60,7 @@ __interrupt void input_ISR() {
 
 // Timer A0 ISR
 #pragma vector=TIMER0_A0_VECTOR
-__interrupt void Timer0_A_CC0_ISR(){
+__interrupt void Timer0_A_CC0_ISR() {
     result = signal_count * 60;
     signal_count = 0;
 }
@@ -79,14 +72,11 @@ __interrupt void Timer1_A_CC0_ISR() {
         timer_digit = 2 * current_digit;
         TA1CCR0 = LED_PERIOD;
     }
-
     if(timer_digit) {
         P1OUT ^= LED;
-
         timer_digit--;
         TA1CCR0 = LED_PERIOD;
     }
-
     if(!timer_digit) {
         P1OUT |= LED;
         TA1CCR0 = 10 * LED_PERIOD;
@@ -109,10 +99,9 @@ __interrupt void Buttons_ISR() {
         if(measuring){
             return;
         }
-
         P1OUT &= ~LED;
 
-        TA1CCTL0 &= ~CCIE;    // Deactivate CCR interrupt
+        TA1CCTL0 &= ~CCIE;              // Deactivate CCR interrupt
         TA1CCR0 = 0;
 
         measuring = 1;
@@ -131,7 +120,6 @@ __interrupt void Buttons_ISR() {
             measuring = 0;
 
             // Calculations
-
             result_digits[2] = result % 10;
             result_digits[1] = (result / 10) % 10;
             result_digits[0] = (result / 100) % 10;
@@ -142,12 +130,10 @@ __interrupt void Buttons_ISR() {
             TA1CCR0 = LED_PERIOD;
 
             P1OUT &= ~LED;
-
             timer_digit = 2 * current_digit;
 
             return;
         }
-
         // LED switch units
         else{
             if(index == 3) index = 0;
@@ -156,7 +142,6 @@ __interrupt void Buttons_ISR() {
             timer_digit = 2 * current_digit;
             TA1CCR0 = LED_PERIOD;
         }
-
     }
 }
 
@@ -166,5 +151,4 @@ void clear_global_variables(){
     index = 0;
     current_digit = 0;
     timer_digit = 0;
-
 }

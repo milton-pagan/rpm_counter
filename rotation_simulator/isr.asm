@@ -33,7 +33,7 @@ END:
 	mov arr_pntr, r5
 	add index, r5
 
-	mov @r5, timer_count					; Copy next rpm to timer_count
+	mov @r5, timer_count			; Copy next rpm to timer_count
 	bic.b #BUTTON, &P2IFG			; Clear interrupt flag
 
 	reti
