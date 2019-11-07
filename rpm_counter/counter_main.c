@@ -1,12 +1,12 @@
 #include <msp430.h> 
 
 #define LED BIT7
-#define BUTTON1 BIT3 //start
-#define BUTTON2 BIT7 //stop || LED unit change
-#define FREQ 4096
-#define ONE_SEC 2048 // Control LED flash velocity
+#define BUTTON1 BIT3 //start button
+#define BUTTON2 BIT7 //stop and LED unit change button
+#define FREQ 4096   // Clock frequency after dividers
+#define LED_PERIOD 2048 // LED flash period in terms of timer count
 
-// Prototypes
+// Headers
 void clear_global_variables();
 
 // Global Variables
@@ -14,7 +14,7 @@ static long signal_count, timer_digit;
 int measuring = 0;
 
 int result_digits[3];
-unsigned int index, current_digit, result, time;
+unsigned int index, current_digit, result;
 
 // Functions
 void main()
@@ -68,27 +68,28 @@ __interrupt void input_ISR() {
 // Timer A0 ISR
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer0_A_CC0_ISR(){
-    time += 1;
+    result = signal_count * 60;
+    signal_count = 0;
 }
 
 // Timer A1 ISR
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void Timer1_A_CC0_ISR() {
-    if(TA1CCR0 == 10 * ONE_SEC) {
+    if(TA1CCR0 == 10 * LED_PERIOD) {
         timer_digit = 2 * current_digit;
-        TA1CCR0 = ONE_SEC;
+        TA1CCR0 = LED_PERIOD;
     }
 
     if(timer_digit) {
         P1OUT ^= LED;
 
         timer_digit--;
-        TA1CCR0 = ONE_SEC;
+        TA1CCR0 = LED_PERIOD;
     }
 
     if(!timer_digit) {
         P1OUT |= LED;
-        TA1CCR0 = 10 * ONE_SEC;
+        TA1CCR0 = 10 * LED_PERIOD;
     }
 }
 
@@ -108,10 +109,15 @@ __interrupt void Buttons_ISR() {
         if(measuring){
             return;
         }
-        TA1CCR0 = 0;
+
         P1OUT &= ~LED;
+
+        TA1CCTL0 &= ~CCIE;    // Deactivate CCR interrupt
+        TA1CCR0 = 0;
+
         measuring = 1;
         clear_global_variables();
+
         P1IE |= BIT0;
         TA0CCR0 = FREQ;
         return;
@@ -126,16 +132,14 @@ __interrupt void Buttons_ISR() {
 
             // Calculations
 
-            result = signal_count / time;
-            result *= 60;
-
             result_digits[2] = result % 10;
             result_digits[1] = (result / 10) % 10;
             result_digits[0] = (result / 100) % 10;
 
             current_digit = result_digits[index++];
 
-            TA1CCR0 = ONE_SEC;
+            TA1CCTL0 |= CCIE;           // Activate CCR interrupt
+            TA1CCR0 = LED_PERIOD;
 
             P1OUT &= ~LED;
 
@@ -150,7 +154,7 @@ __interrupt void Buttons_ISR() {
             current_digit = result_digits[index++];
             P1OUT &= ~LED;
             timer_digit = 2 * current_digit;
-            TA1CCR0 = ONE_SEC;
+            TA1CCR0 = LED_PERIOD;
         }
 
     }
@@ -158,7 +162,6 @@ __interrupt void Buttons_ISR() {
 
 void clear_global_variables(){
     signal_count = 0;
-    time = 0;
     result = 0;
     index = 0;
     current_digit = 0;

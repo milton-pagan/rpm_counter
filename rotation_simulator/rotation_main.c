@@ -5,8 +5,6 @@
  * main.c
  */
 
-int calculate_timer_count(int);
-
 int timer_count;
 int rpm_arr[5] = {60, 120, 180, 240, 300};
 int arr_size = 5;
